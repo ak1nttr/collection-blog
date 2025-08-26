@@ -11,7 +11,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-yellow-200 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#FFDAB3] to-[#574964]">
       <div className="max-w-7xl mx-auto px-6 py-6 space-y-12">
 
         {/* Categories Section */}

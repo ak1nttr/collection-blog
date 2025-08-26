@@ -10,12 +10,15 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [checkingAuth, setCheckingAuth] = useState(true)
 
   useEffect(() => {
     // Check if admin is already logged in
     const getUser = async () => {
+      setCheckingAuth(true)
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
+      setCheckingAuth(false)
     }
     getUser()
 
@@ -47,10 +50,25 @@ export default function AdminLogin() {
     await supabase.auth.signOut()
   }
 
+  // Show spinner while checking auth status
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#213448] to-[#ECEFCA]">
+        <div className="flex flex-col items-center">
+          <svg className="animate-spin w-10 h-10 text-white mb-4" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span className="text-white text-lg">Yükleniyor...</span>
+        </div>
+      </div>
+    )
+  }
+
   // If admin is logged in
   if (user) {
     return (
-      <div className="min-h-screen bg-gradient-to-r from-slate-700 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-b from-[#213448] to-[#ECEFCA]">
         {/* Header */}
         <header className="bg-white/10 backdrop-blur-lg border-b border-white/20">
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -58,7 +76,7 @@ export default function AdminLogin() {
               <div className="flex items-center space-x-4">
                 <h1 className="text-2xl font-bold text-white">Admin Paneli</h1>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <div className="text-lg text-gray-300">
                   Merhaba, <span className="text-white font-medium">{user.email}</span>
@@ -120,7 +138,7 @@ export default function AdminLogin() {
 
   // Login Form
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-800 via-purple-300 to-slate-400 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#F6F0F0] to-[#BDB395] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Login Card */}
         <div className="bg-black/50 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-xl">
@@ -129,7 +147,7 @@ export default function AdminLogin() {
             <h2 className="text-3xl font-bold text-white mb-2">Admin Girişi</h2>
             <p className="text-gray-300">Gönderileri yönetmek için giriş yap</p>
           </div>
-          
+
           <form onSubmit={handleLogin} className="space-y-6" autoComplete='off'>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
@@ -177,7 +195,13 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-blue-300 to-purple-500 hover:from-blue-300 hover:to-purple-600 text-white rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+              className="w-full py-3 px-4 
+                        bg-gradient-to-r from-blue-200 to-blue-300
+                        text-white rounded-xl font-semibold 
+                        border border-white hover:border-black 
+                        transition-all duration-200 
+                        disabled:opacity-50 disabled:cursor-not-allowed 
+                        flex items-center justify-center space-x-2"
             >
               {loading ? (
                 <>
