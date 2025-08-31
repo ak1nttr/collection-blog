@@ -1,4 +1,4 @@
-import { Post } from "@/types/post";
+import { Post, UploadedImage } from "@/types/post";
 import React, { useState, ChangeEvent } from "react";
 
 interface PostModalProps {
@@ -11,7 +11,7 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
-    const [images, setImages] = useState<File[]>([]);
+    const [images, setImages] = useState<UploadedImage[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -26,17 +26,103 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
         return result;
     }
 
-    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const uploadImageToR2 = async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || "Image upload failed");
+        }
+
+        return result.url; // R2 URL
+    }
+
+    const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files) return;
         const filesArray = Array.from(e.target.files);
-        setImages(prev => [...prev, ...filesArray]);
+
+        const newImages: UploadedImage[] = filesArray.map(file => ({
+            file,
+            url: null,
+            key: null,
+            uploading: true,
+            error: null
+        }));
+
+        setImages(prev => [...prev, ...newImages]);
+
+        for (let i = 0; i < filesArray.length; i++) {
+            const file = filesArray[i];
+            const imageIndex = images.length + i;
+
+            try {
+                const result = await uploadImageToR2(file);
+                const imageKey = result;
+
+                setImages(prev => prev.map((img, idx) =>
+                    idx === imageIndex
+                        ? { ...img, url: result, key: imageKey, uploading: false }
+                        : img
+                ));
+            } catch (error) {
+                setImages(prev => prev.map((img, idx) =>
+                    idx === imageIndex
+                        ? {
+                            ...img,
+                            uploading: false,
+                            error: error instanceof Error ? error.message : 'Upload failed'
+                        }
+                        : img
+                ));
+            }
+        }
     };
 
     const removeImage = (indexToRemove: number) => {
         setImages(images.filter((_, index) => index !== indexToRemove));
     };
 
-    const handleSubmit = () => {
+    const retryImageUpload = async (index: number) => {
+        const imageToRetry = images[index];
+        if (!imageToRetry) return;
+
+        setImages(prev => prev.map((img, idx) =>
+            idx === index
+                ? { ...img, uploading: true, error: null }
+                : img
+        ));
+
+        try {
+            const result = await uploadImageToR2(imageToRetry.file);
+
+            const imageKey = result;
+            
+            setImages(prev => prev.map((img, idx) => 
+                idx === index 
+                    ? { ...img, key: imageKey, url: result, uploading: false }
+                    : img
+            ));
+        } catch (error) {
+            setImages(prev => prev.map((img, idx) =>
+                idx === index
+                    ? {
+                        ...img,
+                        uploading: false,
+                        error: error instanceof Error ? error.message : 'Upload failed'
+                    }
+                    : img
+            ));
+        }
+    };
+
+    const handleSubmit = async () => {
         setError(null);
 
         if (!title || title.length > 50) {
@@ -51,29 +137,45 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
             setError("Ürün fiyatı geçerli bir sayı olmalıdır");
             return;
         }
+        const stillUploading = images.some(img => img.uploading);
+        if (stillUploading) {
+            setError("Lütfen tüm resimlerin yüklenmesini bekleyin");
+            return;
+        }
 
-        const post: Post = {
-            id: generatePostCode(),
-            title,
-            description,
-            price: parseFloat(price.replace(",", ".")),
-            images: images.map((file) => URL.createObjectURL(file)),
-        };
-
-        // upload images to server or cloud storage, get their URLs
-        // save post with image URLs
-        console.log("Submitting post:", post);
-
+        const failedUploads = images.filter(img => img.error);
+        if (failedUploads.length > 0) {
+            setError("Lütfen yüklenemeyen resimleri yeniden yükleyin veya kaldırın");
+            return;
+        }
         setLoading(true);
-        onSubmit(post);
-        setLoading(false);
-        onClose();
 
-        // reset form
-        setTitle("");
-        setDescription("");
-        setPrice("");
-        setImages([]);
+        try {
+            const uploadedImageKeys = images.map(img => img.key!).filter(Boolean);
+
+            const post: Post = {
+                id: generatePostCode(),
+                title,
+                description,
+                price: parseFloat(price.replace(",", ".")),
+                images: uploadedImageKeys,
+            };
+
+            console.log("Submitting post with uploaded images:", post);
+            // TODO: save post to database with image keys
+            await onSubmit(post);
+
+            // Reset form
+            setTitle("");
+            setDescription("");
+            setPrice("");
+            setImages([]);
+            onClose();
+        } catch (error) {
+            setError("Gönderi oluşturulurken bir hata oluştu");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleBackdropClick = (e: React.MouseEvent) => {
@@ -82,8 +184,12 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
         }
     };
 
+    const uploadProgress = images.length > 0
+        ? (images.filter(img => img.url && !img.error).length / images.length) * 100
+        : 0;
+
     return (
-        <div 
+        <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
             onClick={handleBackdropClick}
         >
@@ -113,6 +219,22 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
                     {error && (
                         <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start space-x-3">
                             <p className="text-red-700 text-sm">{error}</p>
+                        </div>
+                    )}
+
+                    {/* Upload Progress Bar */}
+                    {images.length > 0 && images.some(img => img.uploading) && (
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">Resimler yükleniyor...</span>
+                                <span className="text-gray-600">{Math.round(uploadProgress)}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${uploadProgress}%` }}
+                                ></div>
+                            </div>
                         </div>
                     )}
 
@@ -198,10 +320,12 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
                                 onChange={handleImageChange}
                                 className="hidden"
                                 id="image-upload"
+                                disabled={images.some(img => img.uploading)}
                             />
                             <label
                                 htmlFor="image-upload"
-                                className="cursor-pointer flex flex-col items-center space-y-2 text-center"
+                                className={`cursor-pointer flex flex-col items-center space-y-2 text-center ${images.some(img => img.uploading) ? 'opacity-50 cursor-not-allowed' : ''
+                                    }`}
                             >
                                 <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
                                     <svg className="w-6 h-6 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -209,7 +333,12 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-gray-700">Fotoğrafları seçmek için tıklayın</p>
+                                    <p className="text-sm font-medium text-gray-700">
+                                        {images.some(img => img.uploading)
+                                            ? 'Resimler yükleniyor...'
+                                            : 'Fotoğrafları seçmek için tıklayın'
+                                        }
+                                    </p>
                                     <p className="text-xs text-gray-500">PNG, JPG, GIF - 10MB max</p>
                                 </div>
                             </label>
@@ -219,15 +348,58 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
                     {/* Image Previews */}
                     {images.length > 0 && (
                         <div className="space-y-2">
-                            <p className="text-sm font-semibold text-gray-700">Image Previews ({images.length})</p>
+                            <p className="text-sm font-semibold text-gray-700">
+                                Resim Önizlemeleri ({images.filter(img => img.url).length}/{images.length})
+                            </p>
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                                {images.map((file, idx) => (
+                                {images.map((image, idx) => (
                                     <div key={idx} className="relative group">
-                                        <img
-                                            src={URL.createObjectURL(file)}
-                                            alt={`preview-${idx}`}
-                                            className="w-full h-24 object-cover rounded-lg border border-gray-200"
-                                        />
+                                        <div className="relative">
+                                            <img
+                                                src={image.url || URL.createObjectURL(image.file)}
+                                                alt={`preview-${idx}`}
+                                                className={`w-full h-24 object-cover rounded-lg border border-gray-200 ${image.uploading ? 'opacity-50' : ''
+                                                    } ${image.error ? 'border-red-300' : ''}`}
+                                            />
+
+                                            {/* Upload Status Overlay */}
+                                            {image.uploading && (
+                                                <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center">
+                                                    <svg className="animate-spin w-6 h-6 text-white" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                </div>
+                                            )}
+
+                                            {/* Success Checkmark */}
+                                            {image.url && !image.error && (
+                                                <div className="absolute top-1 left-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                                                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </div>
+                                            )}
+
+                                            {/* Error Indicator */}
+                                            {image.error && (
+                                                <div className="absolute inset-0 bg-red-500/20 rounded-lg flex items-center justify-center">
+                                                    <div className="text-center">
+                                                        <svg className="w-6 h-6 text-red-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        <button
+                                                            onClick={() => retryImageUpload(idx)}
+                                                            className="text-xs bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                                                        >
+                                                            Tekrar Dene
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Remove Button */}
                                         <button
                                             onClick={() => removeImage(idx)}
                                             className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -253,7 +425,7 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
                     </button>
                     <button
                         onClick={handleSubmit}
-                        disabled={loading}
+                        disabled={loading || images.some(img => img.uploading) || images.some(img => img.error)}
                         className="px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-xl hover:from-yellow-600 hover:to-orange-400 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                     >
                         {loading ? (
