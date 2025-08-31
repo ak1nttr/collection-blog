@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import PostModal from '@/components/PostModal'
 import { User } from '@supabase/supabase-js'
 
 export default function AdminLogin() {
+  const [showPostModal, setShowPostModal] = useState(false);
   const [user, setUser] = useState<User | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -76,7 +78,7 @@ export default function AdminLogin() {
               <div className="flex items-center space-x-4">
                 <h1 className="text-2xl font-bold text-white">Admin Paneli</h1>
               </div>
-
+              
               <div className="flex items-center space-x-4">
                 <div className="text-lg text-gray-300">
                   Merhaba, <span className="text-white font-medium">{user.email}</span>
@@ -101,7 +103,8 @@ export default function AdminLogin() {
           {/* Admin Actions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Create Post */}
-            <div className="bg-gradient-to-b from-green-500/20 to-emerald-500/20 backdrop-blur-lg rounded-xl p-8 border border-green-500/30 hover:border-green-400/50 transition-all duration-300 group cursor-pointer">
+            <div className="bg-gradient-to-b from-green-500/20 to-emerald-500/20 backdrop-blur-lg rounded-xl p-8 border border-green-500/30 hover:border-green-400/50 transition-all duration-300 group cursor-pointer"
+              onClick={() => setShowPostModal(true)}>
               <div className="flex items-center space-x-4 mb-4">
                 <div className="w-16 h-16 bg-green-500/30 rounded-xl flex items-center justify-center group-hover:bg-green-500/40 transition-colors">
                   <svg className="w-8 h-8 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,6 +133,16 @@ export default function AdminLogin() {
               </div>
             </div>
           </div>
+
+          {/* PostModal integration */}
+          <PostModal
+            isOpen={showPostModal}
+            onClose={() => setShowPostModal(false)}
+            onSubmit={(post) => {
+              // TODO: handle post creation logic here
+              setShowPostModal(false);
+            }}
+          />
 
         </main>
       </div>
