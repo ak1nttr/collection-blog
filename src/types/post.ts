@@ -4,6 +4,8 @@ export interface Post {
   description: string;
   price: number;
   images?: string[];
+  slug: string;
+  categories?: string[];
   createdAt?: Date;
   updatedAt?: Date;
 }

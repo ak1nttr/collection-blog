@@ -2,6 +2,7 @@
 
 import CategoryCard from '@/components/CategoryCard'
 import { useState } from 'react'
+import { categories } from '@/lib/categories'
 
 export default function Home() {
   const [openCategory, setOpenCategory] = useState<string | null>(null)
@@ -17,33 +18,14 @@ export default function Home() {
         {/* Categories Section */}
         <div>
           <div className="flex flex-row gap-4">
-
-            <CategoryCard
-              title="Madeni Para Koleksiyonu"
-              icon="🪙"
-              subcategories={[
-                'Madalya ve Madalyonlar',
-                'Türkiye Cumhuriyeti Madeni Paralar',
-                'Osmanlı Dönemi Madeni Paralar',
-                'Yabancı Madeni Paralar',
-                'Jeton'
-              ]}
-            />
-
-            <CategoryCard
-              title="Pul Koleksiyonu"
-              icon="✉️"
-            />
-
-            <CategoryCard
-              title="Sanat Eserleri"
-              icon="🎨"
-              subcategories={[
-                'Resimler',
-                'Heykeller',
-              ]}
-            />
-
+            {categories.map(c => (
+              <CategoryCard
+                key={c.title}
+                title={c.title}
+                icon={c.icon}
+                subcategories={c.subcategories}
+              />
+            ))}
           </div>
         </div>
 

@@ -1,5 +1,8 @@
+import { generateSlug } from "@/lib/slugify";
+import { Category } from "@/types/category";
 import { Post, UploadedImage } from "@/types/post";
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
+import { categories } from "@/lib/categories";
 
 interface PostModalProps {
     isOpen: boolean;
@@ -12,9 +15,27 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [images, setImages] = useState<UploadedImage[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+    const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
+    // kategori butonuna açıkken tıklayınca kapanmalı
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (!target.closest('[data-category-dropdown]')) {
+                setIsCategoryDropdownOpen(false);
+            }
+        };
+
+        if (isCategoryDropdownOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isCategoryDropdownOpen]); 
+    
     if (!isOpen) return null;
 
     function generatePostCode() {
@@ -159,6 +180,8 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
                 description,
                 price: parseFloat(price.replace(",", ".")),
                 images: uploadedImageKeys,
+                slug: generateSlug(title),
+                categories: selectedCategories.map(cat => cat.title),
             };
 
             console.log("Submitting post with uploaded images:", post);
@@ -249,7 +272,7 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
                         <div className="relative">
                             <input
                                 type="text"
-                                placeholder="bir başlık girin..."
+                                placeholder="Ürün başlığı girin..."
                                 maxLength={50}
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -301,6 +324,111 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
                                 onChange={(e) => setPrice(e.target.value)}
                                 className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                             />
+                        </div>
+                    </div>
+
+                    {/* Categories Selection */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700 flex items-center space-x-2">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 00-2 2v2m0 0V9a2 2 0 012-2m0 0h14m-14 0v6a2 2 0 002 2m12 0a2 2 0 002-2" />
+                            </svg>
+                            <span>Kategoriler</span>
+                        </label>
+
+                        {/* Selected Categories Display */}
+                        {selectedCategories.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {selectedCategories.map((category, index) => (
+                                    <span
+                                        key={index}
+                                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                    >
+                                        <span className="mr-1">{category.icon}</span>
+                                        {category.title}
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedCategories(prev => prev.filter((_, i) => i !== index))}
+                                            className="ml-2 inline-flex items-center justify-center w-4 h-4 rounded-full text-blue-400 hover:bg-blue-200 hover:text-blue-600 focus:outline-none"
+                                        >
+                                            ×
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Dropdown */}
+                        <div className="relative" data-category-dropdown>
+                            <button
+                                type="button"
+                                onClick={() => setIsCategoryDropdownOpen(prev => !prev)}
+                                className="relative w-full cursor-pointer rounded-xl border border-gray-200 bg-white py-3 pl-4 pr-10 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            >
+                                <span className="block truncate text-gray-500">
+                                    {selectedCategories.length > 0
+                                        ? `${selectedCategories.length} kategori seçildi`
+                                        : "Kategorileri seçin..."
+                                    }
+                                </span>
+                                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                                    <svg
+                                        className={`h-5 w-5 text-gray-400 transition-transform ${isCategoryDropdownOpen ? 'rotate-180' : ''}`}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20"
+                                        fill="currentColor"
+                                    >
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                </span>
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {isCategoryDropdownOpen && (
+                                <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-xl bg-white py-1 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none border border-gray-100">
+                                    {categories.map((category, index) => {
+                                        const isSelected = selectedCategories.some(cat => cat.title === category.title);
+
+                                        return (
+                                            <div
+                                                key={index}
+                                                onClick={() => {
+                                                    if (isSelected) {
+                                                        setSelectedCategories(prev => prev.filter(cat => cat.title !== category.title));
+                                                    } else {
+                                                        setSelectedCategories(prev => [...prev, category]);
+                                                    }
+                                                }}
+                                                className={`relative cursor-pointer select-none py-3 pl-4 pr-9 hover:bg-gray-50 transition-colors ${isSelected ? 'bg-blue-50 text-blue-900' : 'text-gray-900'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center space-x-2">
+                                                    <span className="text-lg">{category.icon}</span>
+                                                    <span className={`block truncate ${isSelected ? 'font-medium' : 'font-normal'}`}>
+                                                        {category.title}
+                                                    </span>
+                                                </div>
+
+                                                {isSelected && (
+                                                    <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-600">
+                                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
+                                                                clipRule="evenodd"
+                                                            />
+                                                        </svg>
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -419,14 +547,14 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
                 <div className="flex justify-end space-x-3 p-6 border-t border-gray-100 bg-gray-50/50">
                     <button
                         onClick={onClose}
-                        className="px-6 py-3 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-red-50 transition-colors font-medium"
+                        className="cursor-pointer px-6 py-3 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-red-50 transition-colors font-medium"
                     >
                         İptal
                     </button>
                     <button
                         onClick={handleSubmit}
                         disabled={loading || images.some(img => img.uploading) || images.some(img => img.error)}
-                        className="px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-xl hover:from-yellow-600 hover:to-orange-400 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                        className="cursor-pointer px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-xl hover:from-yellow-600 hover:to-orange-400 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                     >
                         {loading ? (
                             <>
