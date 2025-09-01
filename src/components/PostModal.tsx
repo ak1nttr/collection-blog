@@ -20,7 +20,6 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
-    // kategori butonuna açıkken tıklayınca kapanmalı
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;
@@ -175,7 +174,6 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
             const uploadedImageKeys = images.map(img => img.key!).filter(Boolean);
 
             const post: Post = {
-                id: generatePostCode(),
                 title,
                 description,
                 price: parseFloat(price.replace(",", ".")),
@@ -185,7 +183,6 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
             };
 
             console.log("Submitting post with uploaded images:", post);
-            // TODO: save post to database with image keys
             await onSubmit(post);
 
             // Reset form

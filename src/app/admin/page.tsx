@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import PostModal from '@/components/PostModal'
 import { User } from '@supabase/supabase-js'
+import { createPost } from '@/services/postService'
+import type { Post } from '@/types/post'
 
 export default function AdminLogin() {
   const [showPostModal, setShowPostModal] = useState(false);
@@ -50,6 +52,14 @@ export default function AdminLogin() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+  }
+
+  const handleCreatePost = async (post: Post) => {
+    try {
+      await createPost(post);
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
   }
 
   // Show spinner while checking auth status
@@ -139,7 +149,7 @@ export default function AdminLogin() {
             isOpen={showPostModal}
             onClose={() => setShowPostModal(false)}
             onSubmit={(post) => {
-              // TODO: handle post creation logic here
+              handleCreatePost(post); // DB WRITE
               setShowPostModal(false);
             }}
           />
