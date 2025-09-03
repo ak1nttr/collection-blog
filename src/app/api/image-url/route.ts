@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Image key required' }, { status: 400 });
         }
 
-        const signedUrl = await getPresignedUrl(imageKey, 3600);
+        const signedUrl = await getPresignedUrl(imageKey, 3600 * 24 * 30);
 
         return NextResponse.json({ url: signedUrl });
     } catch (error) {
