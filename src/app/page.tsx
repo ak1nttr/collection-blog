@@ -69,7 +69,7 @@ export default function Home() {
         <div>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Son Eklenenler</h2>
           <p className="text-gray-600 mb-6">Son eklenen ürünler</p>
-          <div className="relative rounded-xl overflow-hidden border border-gray-300">
+          <div className="relative rounded-xl overflow-hidden">
             {/* Left Arrow */}
             {posts.length > 4 && (
               <button
