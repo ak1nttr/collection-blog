@@ -6,9 +6,11 @@ import PostModal from '@/components/PostModal'
 import { User } from '@supabase/supabase-js'
 import { createPost } from '@/services/postService'
 import type { Post } from '@/types/post'
+import CategoryModal from '@/components/CategoryModal'
 
 export default function AdminLogin() {
   const [showPostModal, setShowPostModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [user, setUser] = useState<User | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -88,7 +90,7 @@ export default function AdminLogin() {
               <div className="flex items-center space-x-4">
                 <h1 className="text-2xl font-bold text-white">Admin Paneli</h1>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <div className="text-lg text-gray-300">
                   Merhaba, <span className="text-white font-medium">{user.email}</span>
@@ -117,12 +119,12 @@ export default function AdminLogin() {
               onClick={() => setShowPostModal(true)}>
               <div className="flex items-center space-x-4 mb-4">
                 <div className="w-16 h-16 bg-green-500/30 rounded-xl flex items-center justify-center group-hover:bg-green-500/40 transition-colors">
-                  <svg className="w-8 h-8 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-green-300" fill="none" stroke="white" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white group-hover:text-green-200 transition-colors">Gönderi Oluştur</h3>
+                  <h3 className="text-2xl font-bold text-white group-hover:text-black transition-colors">Gönderi Oluştur</h3>
                   <p className="text-gray-300">Yeni bir gönderi oluştur</p>
                 </div>
               </div>
@@ -132,13 +134,32 @@ export default function AdminLogin() {
             <div className="bg-gradient-to-b from-blue-500/20 to-cyan-500/20 backdrop-blur-lg rounded-xl p-8 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 group cursor-pointer">
               <div className="flex items-center space-x-4 mb-4">
                 <div className="w-16 h-16 bg-blue-500/30 rounded-xl flex items-center justify-center group-hover:bg-blue-500/40 transition-colors">
-                  <svg className="w-8 h-8 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-8 h-8 text-blue-300" fill="none" stroke="white" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white group-hover:text-blue-200 transition-colors">Gönderileri Düzenle</h3>
+                  <h3 className="text-2xl font-bold text-white group-hover:text-black transition-colors">Gönderileri Düzenle</h3>
                   <p className="text-gray-300">Varolan gönderileri sil veya düzenle</p>
+                </div>
+              </div>
+            </div>
+
+
+            {/* Manage Categories */}
+            <div
+              className='bg-gradient-to-b from-green-500/20 to-emerald-500/20 backdrop-blur-lg rounded-xl p-8 border border-green-500/30 hover:border-green-400/50 transition-all duration-300 group cursor-pointer'
+              onClick={() => setShowCategoryModal(true)}
+            >
+              <div className="flex items-center space-x-4 mb-4">
+                <div className="w-16 h-16 bg-green-500/30 rounded-xl flex items-center justify-center group-hover:bg-green-500/40 transition-colors">
+                  <svg className="w-8 h-8 text-blue-300" fill="none" stroke="white" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white group-hover:text-black transition-colors">Kategorileri Düzenle</h3>
+                  <p className="text-gray-300">Yeni kategori üret, değiştir veya sil</p>
                 </div>
               </div>
             </div>
@@ -152,6 +173,12 @@ export default function AdminLogin() {
               handleCreatePost(post); // DB WRITE
               setShowPostModal(false);
             }}
+          />
+
+          {/* CategoryModal integration */}
+          <CategoryModal
+            open={showCategoryModal}
+            onClose={() => setShowCategoryModal(false)}
           />
 
         </main>

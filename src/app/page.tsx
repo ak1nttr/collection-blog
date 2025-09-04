@@ -2,14 +2,16 @@
 
 import CategoryCard from '@/components/CategoryCard'
 import { useEffect, useState, useRef } from 'react'
-import { categories } from '@/lib/categories'
 import type { Post } from '@/types/post'
 import { getPosts } from '@/services/postService'
 import PostPreview from '@/components/PostPreview'
+import { Category } from '@/types/category'
+import { getCategories } from '@/services/categoryService'
 
 export default function Home() {
   const [openCategory, setOpenCategory] = useState<string | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -22,7 +24,13 @@ export default function Home() {
       }
     }
 
-    fetchPosts()
+    const fetchCategories = async () => {
+      const cats = await getCategories();
+      setCategories(cats);
+    };
+
+    fetchCategories()
+    fetchPosts()  
   }, [])
 
   const toggleCategory = (category: string) => {
@@ -59,7 +67,7 @@ export default function Home() {
                 key={c.title}
                 title={c.title}
                 icon={c.icon}
-                subcategories={c.subcategories}
+                subcategories={c.children}
               />
             ))}
           </div>

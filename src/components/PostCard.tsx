@@ -4,7 +4,6 @@ import { Post } from '../types/post';
 interface PostDetailProps {
   post: Post;
 }
-// TODO: foto siyah görünüyo onu düzelt
 
 const PostCard: React.FC<PostDetailProps> = ({ post }) => {
   const images = post.images || [];
@@ -22,7 +21,7 @@ const PostCard: React.FC<PostDetailProps> = ({ post }) => {
           <div className="relative">
             {images.length === 0 && (
               <div className="flex items-center justify-center h-96 bg-gray-100 rounded-2xl">
-                <div className="text-gray-500">No images available</div>
+                <div className="text-gray-500">Fotoğraf bulunamadı</div>
               </div>
             )}
             {mainImage && (

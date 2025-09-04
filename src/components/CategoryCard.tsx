@@ -1,11 +1,12 @@
 'use client'
 
+import { Category } from '@/types/category'
 import { useState } from 'react'
 
 interface CategoryCardProps {
     title: string
     icon?: string
-    subcategories?: string[]
+    subcategories?: Category[]
 }
 
 export default function CategoryCard({ title, icon, subcategories }: CategoryCardProps) {
@@ -38,11 +39,10 @@ export default function CategoryCard({ title, icon, subcategories }: CategoryCar
                     <ul className="py-2">
                         {subcategories.map((sub) => (
                             <li
-                                key={sub}
                                 className="px-4 py-2 flex items-center space-x-2 hover:bg-gray-100 cursor-pointer"
                             >
-                                <span className="text-gray-400">-</span>
-                                <span className="text-gray-700">{sub}</span>
+                                <span className="text-gray-400">{sub.icon ?? '-'}</span>
+                                <span className="text-gray-700">{sub.title}</span>
                             </li>
                         ))}
                     </ul>

@@ -2,7 +2,7 @@ import { generateSlug } from "@/lib/slugify";
 import { Category } from "@/types/category";
 import { Post, UploadedImage } from "@/types/post";
 import React, { useState, ChangeEvent, useEffect } from "react";
-import { categories } from "@/lib/categories";
+import { getCategories } from "@/services/categoryService";
 
 interface PostModalProps {
     isOpen: boolean;
@@ -15,6 +15,7 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [images, setImages] = useState<UploadedImage[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
     const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -28,23 +29,33 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
             }
         };
 
+        const fetchCategories = async () => {
+            const cats = await getCategories();
+            const flattenedCategories: Category[] = [];
+
+            const flattenTree = (categories: Category[]) => {
+                categories.forEach(cat => {
+                    flattenedCategories.push(cat);
+                    if (cat.children && cat.children.length > 0) {
+                        flattenTree(cat.children);
+                    }
+                });
+            };
+
+            flattenTree(cats);
+            setCategories(flattenedCategories);
+        };
+        fetchCategories();
+
         if (isCategoryDropdownOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         }
 
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [isCategoryDropdownOpen]); 
-    
+    }, [isCategoryDropdownOpen]);
+
     if (!isOpen) return null;
 
-    function generatePostCode() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let result = '';
-        for (let i = 0; i < 8; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    }
 
     const uploadImageToR2 = async (file: File): Promise<string> => {
         const formData = new FormData();
@@ -123,9 +134,9 @@ const PostModal: React.FC<PostModalProps> = ({ isOpen, onClose, onSubmit }) => {
             const result = await uploadImageToR2(imageToRetry.file);
 
             const imageKey = result;
-            
-            setImages(prev => prev.map((img, idx) => 
-                idx === index 
+
+            setImages(prev => prev.map((img, idx) =>
+                idx === index
                     ? { ...img, key: imageKey, url: result, uploading: false }
                     : img
             ));
