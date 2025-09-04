@@ -20,7 +20,7 @@ export default function CategoryCard({ title, icon, subcategories }: CategoryCar
             {/* Main category button */}
             <button
                 className={`rounded-md px-6 py-3 min-w-[200px] text-left border transition-colors flex items-center space-x-2 ${isOpen
-                        ? 'bg-orange-600/60 text-white border-black'
+                        ? 'bg-yellow-400/60 text-white border-black'
                         : 'bg-white hover:bg-gray-50'
                     }`}
                 style={{ fontWeight: 500 }}
