@@ -21,8 +21,8 @@ export default function CategoryCard({ title, icon, subcategories }: CategoryCar
             {/* Main category button */}
             <button
                 className={`rounded-md px-6 py-3 min-w-[200px] text-left border transition-colors flex items-center space-x-2 ${isOpen
-                        ? 'bg-yellow-400/60 text-white border-black'
-                        : 'bg-white hover:bg-gray-50'
+                    ? 'bg-yellow-400/60 text-white border-black'
+                    : 'bg-white hover:bg-gray-50'
                     }`}
                 style={{ fontWeight: 500 }}
             >
@@ -39,6 +39,7 @@ export default function CategoryCard({ title, icon, subcategories }: CategoryCar
                     <ul className="py-2">
                         {subcategories.map((sub) => (
                             <li
+                                key={sub.id}
                                 className="px-4 py-2 flex items-center space-x-2 hover:bg-gray-100 cursor-pointer"
                             >
                                 <span className="text-gray-400">{sub.icon ?? '-'}</span>
