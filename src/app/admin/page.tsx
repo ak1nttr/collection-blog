@@ -7,16 +7,20 @@ import { User } from '@supabase/supabase-js'
 import { createPost } from '@/services/postService'
 import type { Post } from '@/types/post'
 import CategoryModal from '@/components/CategoryModal'
+import PostUpdateModal from '@/components/PostUpdateModal'
+import { getPosts } from '@/services/postService'
 
 export default function AdminLogin() {
   const [showPostModal, setShowPostModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showUpdatePostModal, setShowUpdatePostModal] = useState(false);
   const [user, setUser] = useState<User | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
+  const [posts, setPosts] = useState<Post[]>([])
 
   useEffect(() => {
     // Check if admin is already logged in
@@ -32,6 +36,16 @@ export default function AdminLogin() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
     })
+
+    const fetchPosts = async () => {
+      try {
+        const posts = await getPosts();
+        setPosts(posts);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    }
+    fetchPosts()
 
     return () => subscription.unsubscribe()
   }, [])
@@ -131,7 +145,10 @@ export default function AdminLogin() {
             </div>
 
             {/* Edit Posts */}
-            <div className="bg-gradient-to-b from-blue-500/20 to-cyan-500/20 backdrop-blur-lg rounded-xl p-8 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 group cursor-pointer">
+            <div
+              className="bg-gradient-to-b from-blue-500/20 to-cyan-500/20 backdrop-blur-lg rounded-xl p-8 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 group cursor-pointer"
+              onClick={() => setShowUpdatePostModal(true)}
+            >
               <div className="flex items-center space-x-4 mb-4">
                 <div className="w-16 h-16 bg-blue-500/30 rounded-xl flex items-center justify-center group-hover:bg-blue-500/40 transition-colors">
                   <svg className="w-8 h-8 text-blue-300" fill="none" stroke="white" viewBox="0 0 24 24">
@@ -181,6 +198,12 @@ export default function AdminLogin() {
             onClose={() => setShowCategoryModal(false)}
           />
 
+          {/* PostUpdateModal integration */}
+          <PostUpdateModal
+            isOpen={showUpdatePostModal}
+            onClose={() => { setShowUpdatePostModal(false) }}
+            posts={posts}
+          />
         </main>
       </div>
     )
