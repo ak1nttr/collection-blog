@@ -9,10 +9,24 @@ export const getCategories = async (): Promise<Category[]> => {
         .order("title", { ascending: true });
 
     if (error) throw error;
-    console.log(data);
+
     return buildCategoryTree((data || []) as Category[]);
 };
 
+
+export const searchCategories = async (query: string): Promise<Category[]> => {
+    if (query.trim() === '')
+        return await getCategories();
+
+    const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .or(`title.ilike.%${query}%`)
+        .order("title", { ascending: true });
+
+    if (error) throw error;
+    return data;
+}
 
 export const getCategoryById = async (
     id: string
