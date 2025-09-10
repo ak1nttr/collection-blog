@@ -20,14 +20,14 @@ export default function CategoryCard({ title, icon, subcategories }: CategoryCar
         >
             {/* Main category button */}
             <button
-                className={`rounded-md px-6 py-3 min-w-[200px] text-left border transition-colors flex items-center space-x-2 ${isOpen
+                className={`rounded-md px-6 py-3 min-w-[150px] h-10 text-left border transition-colors flex items-center space-x-2 ${isOpen
                     ? 'bg-yellow-400/60 text-white border-black'
                     : 'bg-white hover:bg-gray-50'
                     }`}
                 style={{ fontWeight: 500 }}
             >
-                {icon && <span className="text-xl">{icon}</span>}
-                <span>{title}</span>
+                {icon && <span className="text-xl flex-shrink-0">{icon}</span>}
+                <span className="whitespace-nowrap">{title}</span>
             </button>
 
             {/* Dropdown list: only show if there are subcategories and hovered */}

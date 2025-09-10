@@ -7,12 +7,14 @@ import { getPosts } from '@/services/postService'
 import PostPreview from '@/components/PostPreview'
 import { Category } from '@/types/category'
 import { getCategories } from '@/services/categoryService'
+import SearchModal from '@/components/SearchModal'
 
 export default function Home() {
-  const [openCategory, setOpenCategory] = useState<string | null>(null)
+  const [searchOpen, setSearchOpen] = useState(false) 
   const [posts, setPosts] = useState<Post[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const searchButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -33,9 +35,6 @@ export default function Home() {
     fetchPosts()  
   }, [])
 
-  const toggleCategory = (category: string) => {
-    setOpenCategory(openCategory === category ? null : category)
-  }
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -57,11 +56,36 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#FFDAB3] to-[#574964]">
-      <div className="max-w-7xl mx-auto px-6 py-6 space-y-12">
+      <div className="max-w-7xl mx-auto px-6 py-6 space-y-8">
+
+        <div className='flex flex-row justify-between items-center'>
+          <h2 className="text-3xl font-bold text-gray-900">Kategoriler</h2>
+          <div className='flex flex-row gap-2 items-center'>
+            <SearchModal 
+                isOpen={searchOpen}
+                onClose={() => setSearchOpen(false)} 
+                buttonRef={searchButtonRef}
+            />
+
+            {/* Search Icon */}
+            <button
+                className="p-2 text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 cursor-pointer rounded-lg transition-all duration-200"
+                title="Ara"
+                onClick={() => setSearchOpen(!searchOpen)}
+                ref={searchButtonRef}
+            >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </button>
+          </div>
+        </div>
+
+          
 
         {/* Categories Section */}
-        <div>
-          <div className="flex flex-row gap-4">
+        <div className='flex flex-row justify-between items-center'>
+          <div className="flex flex-row gap-2 flex-wrap">
             {categories.map(c => (
               <CategoryCard
                 key={c.title}
@@ -71,6 +95,8 @@ export default function Home() {
               />
             ))}
           </div>
+
+
         </div>
 
         {/* Hot Products Section */}

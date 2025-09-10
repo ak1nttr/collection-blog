@@ -3,14 +3,15 @@
 import Link from 'next/link'
 
 export default function Navbar() {
+
   return (
-  <nav className="bg-white/80 backdrop-blur-lg border-b-2 border-yellow-500 sticky top-0 bottom-0 z-50">
+    <nav className="bg-white/80 backdrop-blur-lg border-b-2 border-yellow-500 sticky top-0 bottom-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           {/* Logo/Brand */}
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center">
-              <img src="https://cdn-icons-png.flaticon.com/512/3199/3199931.png" width="256" height="256" alt="Mona lisa free icon" title="Mona lisa free icon" />
+              <img src="https://cdn-icons-png.flaticon.com/512/3199/3199931.png" width="256" height="256" alt="" title="" />
             </div>
             <span className="text-4xl font-bold text-gray-900">Koleksiyon Galerim</span>
           </div>
@@ -18,8 +19,8 @@ export default function Navbar() {
           {/* Icon Navigation */}
           <div className="flex items-center space-x-6">
             {/* Home Icon */}
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="p-2 text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 rounded-lg transition-all duration-200"
               title="Anasayfa"
             >
@@ -28,19 +29,9 @@ export default function Navbar() {
               </svg>
             </Link>
 
-            {/* Search Icon */}
-            <button 
-              className="p-2 text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 cursor-pointer rounded-lg transition-all duration-200"
-              title="Ara"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-
             {/* Admin Login Icon */}
-            <Link 
-              href="/admin" 
+            <Link
+              href="/admin"
               className="p-2 text-gray-600 hover:text-yellow-500 hover:bg-yellow-50 cursor-pointer rounded-lg transition-all duration-200"
               title="Admin Girişi"
             >
