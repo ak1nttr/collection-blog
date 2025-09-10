@@ -94,38 +94,6 @@ const SearchPage = () => {
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Main Content Area */}
-                        <div className="lg:col-span-2">
-                            {/* Search Results Summary */}
-                            {q && (
-                                <div className="mb-6">
-                                    <p className="text-black font-bold">
-                                        İlgili {posts.length} ürün bulundu
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Posts Section */}
-                            <div className="space-y-6">
-                                <h2 className="text-2xl font-semibold text-gray-900">Ürünler</h2>
-
-                                {posts.length > 0 ? (
-                                    <div className="grid gap-6">
-                                        {posts.map((post) => (
-                                            <div key={post.id} className="border border-gray-200 rounded-lg p-6">
-                                                <PostPreview post={post} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-12">
-                                        <p className="text-gray-500">
-                                            {q ? 'Aradığınız terim ile alakalı ürün bulunamadı.' : 'Aramak için bir terim girin.'}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
                         {/* Sidebar */}
                         <div className="lg:col-span-1">
                             {/* Related Categories Section */}
@@ -149,6 +117,38 @@ const SearchPage = () => {
                                 )}
                             </div>
                         </div>
+
+
+                        <div className="lg:col-span-2">
+                            {/* Search Results Summary */}
+                            {q && (
+                                <div className="mb-6">
+                                    <p className="text-black font-bold">
+                                        İlgili {posts.length} ürün bulundu
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Posts Section */}
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-semibold text-gray-900">Ürünler</h2>
+
+                                {posts.length > 0 ? (
+                                    <div className="grid grid-cols-3 gap-20">
+                                        {posts.map((post) => (
+                                            <PostPreview key={post.id} post={post} />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <p className="text-gray-500">
+                                            {q ? 'Aradığınız terim ile alakalı ürün bulunamadı.' : 'Aramak için bir terim girin.'}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
 
                     </div>
                 )}

@@ -83,7 +83,7 @@ const PostCard: React.FC<PostDetailProps> = ({ post }) => {
 
           {/* Description */}
           <div className="prose prose-gray max-w-none">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Description</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Açıklama</h3>
             <p className="text-gray-700 text-lg font-medium leading-relaxed whitespace-pre-line">
               {post.description || 'Bu ürün için bir açıklama yok.'}
             </p>

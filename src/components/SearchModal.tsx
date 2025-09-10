@@ -49,23 +49,23 @@ export default function SearchModal({ isOpen, onClose, buttonRef }: SearchModalP
 
     return (
         <div>
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center pr-15">
                 <div
                     ref={modalRef}
-                    className="bg-white rounded-xl shadow-xl p-1 flex items-center gap-1 w-80">
+                    className="bg-white rounded-xl shadow-xl px-1 flex flex-row items-center gap-1 w-48 sm:w-56">
                     <input
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         placeholder="Ara..."
-                        className="flex-1  rounded-xl px-2 py-2 focus:outline-none focus:ring-1 focus:ring-yellow-100 h-9"
+                        className="bg-transparent px-2 py-2 focus:outline-none focus:ring-0 h-9 w-28 sm:w-40 md:w-56 lg:w-72"
                         onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                     />
                     <button
                         onClick={handleSearch}
                         className="p-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl"
                     >
-                        <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 20 20" aria-hidden="true" height="20px" width="20px" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path>
+                        <svg stroke="currentColor" fill="currentColor" strokeWidth="1" viewBox="0 0 24 24" height="20px" width="20px" xmlns="http://www.w3.org/2000/svg"><path d="M10 18a7.952 7.952 0 0 0 4.897-1.688l4.396 4.396 1.414-1.414-4.396-4.396A7.952 7.952 0 0 0 18 10c0-4.411-3.589-8-8-8s-8 3.589-8 8 3.589 8 8 8zm0-14c3.309 0 6 2.691 6 6s-2.691 6-6 6-6-2.691-6-6 2.691-6 6-6z"></path>
                         </svg>
                     </button>
                 </div>

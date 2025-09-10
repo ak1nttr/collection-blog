@@ -8,7 +8,7 @@ type PostPreviewProps = {
 export default function PostPreview({ post }: PostPreviewProps) {
     return (
         <Link href={`/posts/${post.id}`}>
-            <div className="bg-white rounded-lg p-4 shadow-sm hover:shadow-xl border border-transparent hover:border-yellow-400 transition-all duration-300 cursor-pointer w-70 flex-shrink-0 group">
+            <div className="bg-white rounded-lg p-4 shadow-lg hover:shadow-xl border border-gray-300 hover:border-yellow-400 transition-all duration-300 cursor-pointer w-70 flex-shrink-0 group">
                 <img
                     src={post.images?.[0]}
                     alt={post.title}
