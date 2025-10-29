@@ -102,7 +102,7 @@ const PostCard: React.FC<PostDetailProps> = ({ post }) => {
                 {post.categories.map((category: string, index: number) => (
                   <span
                     key={index}
-                    className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-[#6C5D7C] text-white hover:bg-[#574964] cursor-pointer transition-colors duration-200"
+                    className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-[#6C5D7C] text-white hover:bg-[#574964] cursor-default transition-colors duration-200"
                   >
                     {category}
                   </span>

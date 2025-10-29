@@ -1,6 +1,5 @@
 import './globals.css'
 import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
 
 export const metadata = {
   title: 'Koleksiyon Blog',
@@ -19,10 +18,6 @@ export default function RootLayout({
         <main className="flex-1">
           {children}
         </main>
-        <Footer
-          email="you@example.com"
-          githubUrl="https://github.com/ak1nttr"
-        />
       </body>
     </html>
   )
